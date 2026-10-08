@@ -8,3 +8,7 @@ The project of Group 10 for the Data Engineering course in Fall 2026
 ## Data Dictionary
 
 See [infra/README.md](infra/README.md).
+
+## Example Queries
+
+See [docs/examples.sql](docs/examples.sql).
