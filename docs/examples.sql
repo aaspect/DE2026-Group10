@@ -1,3 +1,25 @@
+-- 1. Cheapest consecutive 3-hour window on a given day, and the cost of consuming 10 kWh in it. 3 hours = 12 intervals (frame 0..11)
+SELECT
+  window_start,
+  round(avg_price, 2)             AS avg_price_eur_mwh,
+  round(10 / 1000 * avg_price, 3) AS cost_eur
+FROM (
+  SELECT
+    i.interval_start_local       AS window_start,
+    avg(f.price_eur_mwh) OVER w  AS avg_price,
+    count() OVER w               AS intervals
+  FROM core.fact_price AS f FINAL
+  JOIN core.dim_interval     AS i ON f.interval_key = i.interval_key
+  JOIN core.dim_bidding_zone AS z ON f.zone_key = z.zone_key
+  WHERE z.zone_code = 'EE' AND i.local_date = '2026-09-15'
+  WINDOW w AS (ORDER BY f.interval_start_utc ROWS BETWEEN CURRENT ROW AND 11 FOLLOWING)
+)
+WHERE intervals = 12
+ORDER BY avg_price
+LIMIT 1;
+
+
+
 -- 2. How wind speed and solar radiation relate to price and renewable production. Correlation: -1 = moves opposite, 0 = none, 1 = together.
 WITH weather AS (
   SELECT
