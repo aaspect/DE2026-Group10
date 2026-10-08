@@ -11,9 +11,11 @@ The objective of the project is to provide analytics related to electricity pric
 
 See [infra/README.md](infra/README.md).
 
-## Example Queries
+## Example Queries and DDL
 
-See [docs/examples.sql](docs/examples.sql).
+See [docs/examples.sql](docs/examples.sql) for example queries.
+
+See [infra/clickhouse/init/](infra/clickhouse/init/) for the DDL.
 
 ## LLM Disclosure
 
