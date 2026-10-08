@@ -12,3 +12,7 @@ See [infra/README.md](infra/README.md).
 ## Example Queries
 
 See [docs/examples.sql](docs/examples.sql).
+
+## LLM Disclosure
+
+See [docs/LLM_disclosure.md](docs/LLM_disclosure.md).
