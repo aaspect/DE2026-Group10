@@ -16,7 +16,3 @@ See [infra/README.md](infra/README.md).
 See [docs/examples.sql](docs/examples.sql) for example queries.
 
 See [infra/clickhouse/init/](infra/clickhouse/init/) for the DDL.
-
-## LLM Disclosure
-
-See [docs/LLM_disclosure.md](docs/LLM_disclosure.md).
