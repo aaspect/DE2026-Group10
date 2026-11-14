@@ -123,8 +123,11 @@ a record for every hour of every day in that month.
   UTC and every UTC day has exactly 24 hourly records.
 - **The same mode is run twice in quick succession or overlapping**: each run has its own
   identifier and both are stored. Choosing the latest record is done downstream.
-- **The output location is missing, not writable or runs out of space**: the run fails with a
-  clear message and leaves no partial file behind. Re-running the job fetches the data again.
+- **The output location is missing**: the job creates it, including any missing parent folders,
+  before contacting the provider.
+- **The output location cannot be created, is not writable or runs out of space**: the run fails
+  with a clear message and leaves no partial file behind. Re-running the job fetches the data
+  again.
 - **The output location already holds files from earlier runs**: they are left as they are. Each
   run writes a new file named so that it cannot clash with any other run's file.
 - **Location configuration is empty or invalid** (duplicate identifiers, latitude or longitude out
@@ -163,7 +166,9 @@ a record for every hour of every day in that month.
   message MUST name the faulty entry.
 - **FR-008**: All other settings MUST come from environment variables or configuration files. This
   covers provider addresses, forecast horizon, archive window, retry policy and output location.
-  Credentials MUST NOT be stored in the repository.
+  The job MUST also read these settings from an optional local `.env` file, where variables
+  already set in the environment take precedence. Relative paths MUST NOT depend on the folder the
+  job is started from. Credentials MUST NOT be stored in the repository.
 
 **Data captured**
 
@@ -219,7 +224,7 @@ a record for every hour of every day in that month.
 
 - **FR-021**: The job MUST write each run's records to one new file in a configurable local output
   location. The file name MUST identify the mode and the run. Each file MUST hold only that run's
-  records, in a machine-readable tabular format. It MUST include every attribute from FR-009 to
+  records, in JSON format (JSON Lines: one JSON object per record). It MUST include every attribute from FR-009 to
   FR-011, so a later integration can load it into the warehouse's raw (bronze) weather table
   without reshaping. The job MUST NOT write to the warehouse.
 

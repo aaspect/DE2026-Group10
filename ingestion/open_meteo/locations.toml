@@ -1,0 +1,46 @@
+# Roles are a team decision; change here, not in code.
+
+# Largest demand centre.
+[[locations]]
+id = "tallinn"
+name = "Tallinn"
+latitude = 59.4370
+longitude = 24.7536
+bidding_zone = "EE"
+role = "demand"
+
+# Second city, south-east solar parks.
+[[locations]]
+id = "tartu"
+name = "Tartu"
+latitude = 58.3806
+longitude = 26.7251
+bidding_zone = "EE"
+role = "solar"
+
+# West-coast wind, offshore plans.
+[[locations]]
+id = "parnu"
+name = "Pärnu"
+latitude = 58.3859
+longitude = 24.4971
+bidding_zone = "EE"
+role = "wind"
+
+# North-east industry and oil-shale generation.
+[[locations]]
+id = "narva"
+name = "Narva"
+latitude = 59.3772
+longitude = 28.1903
+bidding_zone = "EE"
+role = "demand"
+
+# Saaremaa island wind.
+[[locations]]
+id = "kuressaare"
+name = "Kuressaare"
+latitude = 58.2529
+longitude = 22.4848
+bidding_zone = "EE"
+role = "wind"
