@@ -16,3 +16,16 @@ See [infra/README.md](infra/README.md).
 See [docs/examples.sql](docs/examples.sql) for example queries.
 
 See [infra/clickhouse/init/](infra/clickhouse/init/) for the DDL.
+
+## Spec-Driven Development
+
+Features are developed with [Spec Kit](https://github.com/github/spec-kit).
+
+- Project principles: [.specify/memory/constitution.md](.specify/memory/constitution.md)
+- Feature specs, plans and tasks: [specs/](specs/)
+
+Workflow: `/speckit-specify` → `/speckit-clarify` → `/speckit-plan` → `/speckit-tasks` → `/speckit-analyze` → `/speckit-implement`.
+
+Other commands: `/speckit-constitution` (update principles), `/speckit-checklist` (generate a quality checklist), `/speckit-converge` (add tasks for unbuilt work).
+
+No separate LLM disclosure file is provided, as the specs already cover LLM usage.
