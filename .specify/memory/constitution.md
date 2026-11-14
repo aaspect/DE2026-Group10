@@ -63,9 +63,11 @@ growing history of past bugs.
 
 ### V. Layered, Documented Data Model
 
-- Data flows through fixed layers: raw/bronze (as ingested) → staging → core (facts and
-  dimensions) → marts, transformed with dbt in ClickHouse. Layers MUST NOT be skipped, and raw
-  data MUST NOT be modified in place.
+- Data flows through fixed layers, each a separate ClickHouse database: bronze (raw, as
+  ingested, append-only) → silver (cleaned, typed, deduplicated) → gold (facts and dimensions,
+  plus the marts Superset reads). Silver and gold are built with dbt. Layers MUST NOT be skipped,
+  and bronze data MUST NOT be modified in place.
+- Superset reads only from gold.
 - All timestamps are stored in UTC; local time is derived only in dimensions or marts.
 - The grain of every fact table MUST be stated explicitly (e.g. one row per bidding zone per
   interval) and enforced with dbt tests.
@@ -106,4 +108,4 @@ graders and teammates.
 - Any deviation from a principle MUST be justified in the pull request description; unjustified
   complexity is grounds to request changes.
 
-**Version**: 1.0.0 | **Ratified**: 2026-11-10 | **Last Amended**: 2026-11-10
+**Version**: 1.0.1 | **Ratified**: 2026-11-10 | **Last Amended**: 2026-11-14

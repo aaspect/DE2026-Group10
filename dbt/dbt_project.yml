@@ -1,0 +1,17 @@
+name: energy_analytics
+version: "1.0.0"
+profile: energy_analytics
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+
+# `+schema` is the ClickHouse database a folder's models are built into
+# (see macros/generate_schema_name.sql). Marts live in gold next to facts and dimensions.
+models:
+  energy_analytics:
+    silver:
+      +schema: silver
+    gold:
+      +schema: gold
+    marts:
+      +schema: gold

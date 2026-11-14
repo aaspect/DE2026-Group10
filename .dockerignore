@@ -1,0 +1,6 @@
+# The Airflow image is built with the repository root as context. It only needs the files below;
+# everything else (source code, dbt project, DAGs) is bind-mounted at run time.
+*
+!ingestion/pyproject.toml
+!ingestion/uv.lock
+!airflow/entrypoint.sh

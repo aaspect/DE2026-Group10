@@ -1,6 +1,14 @@
 # Data Dictionary
 
-Currently bronze tables are brought out here.
+The warehouse init scripts in [clickhouse/init/](clickhouse/init/) create only the three layer
+databases (`bronze`, `silver`, `gold`) and the read-only account Superset uses. They create no
+tables.
+
+The bronze tables below are **planned**, not created yet. Each gets its DDL in the feature that
+loads it, and the definitions here will be updated to match then. The Open-Meteo weather table
+will be `bronze.open_meteo_weather`, with the columns of the job's run files
+([output contract](../specs/001-open-meteo-ingestion/contracts/output-file.md)); it replaces
+`bronze.weather_hour` below.
 
 ## bronze.elering_prices
 

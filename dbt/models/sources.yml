@@ -1,0 +1,12 @@
+version: 2
+
+sources:
+  - name: bronze
+    description: Raw data as ingested, append-only. Loaded by the ingestion jobs, never by dbt.
+    schema: bronze
+    tables:
+      - name: open_meteo_weather
+        description: >
+          Hourly Open-Meteo weather, one row per location per hour per run. Planned: the table
+          and its columns are created by the bronze loading feature, from the run files described
+          in specs/001-open-meteo-ingestion/contracts/output-file.md.

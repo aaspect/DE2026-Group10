@@ -1,0 +1,14 @@
+# Connection to the local ClickHouse warehouse. Used inside the Airflow container, which sets
+# DBT_PROFILES_DIR to this folder and passes the pipeline account's credentials.
+energy_analytics:
+  target: local
+  outputs:
+    local:
+      type: clickhouse
+      driver: http
+      host: clickhouse
+      port: 8123
+      user: "{{ env_var('CLICKHOUSE_USER') }}"
+      password: "{{ env_var('CLICKHOUSE_PASSWORD') }}"
+      schema: bronze
+      secure: false
