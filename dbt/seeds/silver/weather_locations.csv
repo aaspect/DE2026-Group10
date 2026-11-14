@@ -1,0 +1,6 @@
+location_key,location_name,latitude,longitude,zone_code,location_role
+tallinn,Tallinn,59.4370,24.7536,EE,demand
+tartu,Tartu,58.3806,26.7251,EE,solar
+parnu,Pärnu,58.3859,24.4971,EE,wind
+narva,Narva,59.3772,28.1903,EE,demand
+kuressaare,Kuressaare,58.2529,22.4848,EE,wind

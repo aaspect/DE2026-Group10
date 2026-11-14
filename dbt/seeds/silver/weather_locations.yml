@@ -1,0 +1,34 @@
+version: 2
+
+seeds:
+  - name: weather_locations
+    description: >
+      The weather locations, one row per location. A copy of
+      ingestion/open_meteo/locations.toml, because dbt cannot read TOML. The TOML file is the
+      source of truth: change it first, then this file. The pytest
+      ingestion/tests/open_meteo/test_locations_seed.py fails when the two differ.
+    columns:
+      - name: location_key
+        description: The location id from the configuration (`id`), e.g. `tallinn`.
+        data_tests:
+          - unique
+          - not_null
+      - name: location_name
+        description: Display name (`name`), e.g. `Pärnu`.
+        data_tests:
+          - not_null
+      - name: latitude
+        description: Latitude of the configured point, in degrees north.
+      - name: longitude
+        description: Longitude of the configured point, in degrees east.
+      - name: zone_code
+        description: Bidding zone the location belongs to (`bidding_zone`), e.g. `EE`.
+        data_tests:
+          - not_null
+      - name: location_role
+        description: Why the location is tracked (`role`).
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [demand, solar, wind]

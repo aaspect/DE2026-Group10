@@ -5,7 +5,7 @@ import os
 import re
 import tomllib
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Self
 from urllib.parse import urlsplit
@@ -24,8 +24,12 @@ DEFAULTS = {
     "OPEN_METEO_TIMEOUT_SECONDS": "30",
     "OPEN_METEO_OUTPUT_DIR": "output/open_meteo",
     "OPEN_METEO_LOCATIONS_FILE": "open_meteo/locations.toml",
+    "OPEN_METEO_DESTINATION": "warehouse",
+    "CLICKHOUSE_URL": "http://localhost:8123",
 }
 PROVIDER_MAX_FORECAST_DAYS = 16
+# Where a run is stored: the bronze table, a local run file, or both.
+DESTINATIONS = ("warehouse", "file", "both")
 
 LOCATION_KEYS = ("id", "name", "latitude", "longitude", "bidding_zone", "role")
 LOCATION_ID_PATTERN = re.compile(r"[a-z0-9_]+")
@@ -56,14 +60,31 @@ class Settings:
     timeout_seconds: float
     output_dir: Path
     locations_file: Path
+    destination: str
+    clickhouse_url: str
+    clickhouse_user: str | None
+    clickhouse_password: str | None = field(repr=False)
+
+    @property
+    def writes_warehouse(self) -> bool:
+        return self.destination in ("warehouse", "both")
+
+    @property
+    def writes_file(self) -> bool:
+        return self.destination in ("file", "both")
 
     @classmethod
-    def from_env(cls, environ: Mapping[str, str] | None = None) -> Self:
-        """Read settings from `environ`, or from the process environment and `.env` if omitted."""
+    def from_env(
+        cls, environ: Mapping[str, str] | None = None, *, destination: str | None = None
+    ) -> Self:
+        """Read settings from `environ`, or from the process environment and `.env` if omitted.
+
+        `destination` overrides OPEN_METEO_DESTINATION.
+        """
         if environ is None:
             load_dotenv(PROJECT_DIR / ".env", override=False)
             environ = os.environ
-        return cls(
+        settings = cls(
             forecast_url=_read_url(environ, "OPEN_METEO_FORECAST_URL"),
             archive_url=_read_url(environ, "OPEN_METEO_ARCHIVE_URL"),
             forecast_days=_read_int(
@@ -79,7 +100,18 @@ class Settings:
             ),
             output_dir=_read_path(environ, "OPEN_METEO_OUTPUT_DIR"),
             locations_file=_read_path(environ, "OPEN_METEO_LOCATIONS_FILE"),
+            destination=_read_destination(environ, destination),
+            clickhouse_url=_read_url(environ, "CLICKHOUSE_URL"),
+            clickhouse_user=_read_optional(environ, "CLICKHOUSE_USER"),
+            clickhouse_password=_read_optional(environ, "CLICKHOUSE_PASSWORD"),
         )
+        has_credentials = settings.clickhouse_user and settings.clickhouse_password
+        if settings.writes_warehouse and not has_credentials:
+            raise ConfigError(
+                "CLICKHOUSE_USER and CLICKHOUSE_PASSWORD must be set when the destination "
+                "includes warehouse"
+            )
+        return settings
 
 
 def load_locations(path: Path) -> list[Location]:
@@ -161,6 +193,19 @@ def _read(environ: Mapping[str, str], name: str) -> str:
     value = environ.get(name, DEFAULTS[name]).strip()
     if not value:
         raise ConfigError(f"{name} must not be empty")
+    return value
+
+
+def _read_optional(environ: Mapping[str, str], name: str) -> str | None:
+    return environ.get(name, "").strip() or None
+
+
+def _read_destination(environ: Mapping[str, str], override: str | None) -> str:
+    value = _read(environ, "OPEN_METEO_DESTINATION") if override is None else override
+    if value not in DESTINATIONS:
+        raise ConfigError(
+            f"OPEN_METEO_DESTINATION must be one of {', '.join(DESTINATIONS)}, got '{value}'"
+        )
     return value
 
 

@@ -1,5 +1,5 @@
--- Warehouse layers, one database each. No tables are created here: bronze tables come with the
--- loading features, silver and gold are built by dbt.
+-- Warehouse layers, one database each. Bronze tables are created by the later init scripts
+-- (03_*.sql), silver and gold tables are built by dbt.
 
 -- Raw data as ingested, append-only. Written by the ingestion loaders.
 CREATE DATABASE IF NOT EXISTS bronze;

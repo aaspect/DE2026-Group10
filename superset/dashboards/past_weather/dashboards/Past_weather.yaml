@@ -1,0 +1,244 @@
+dashboard_title: Past weather
+description: null
+css: null
+slug: past-weather
+certified_by: null
+certification_details: null
+published: true
+uuid: 1f0b249f-f03f-46f8-bab3-67aeaa068df6
+position:
+  DASHBOARD_VERSION_KEY: v2
+  ROOT_ID:
+    type: ROOT
+    id: ROOT_ID
+    children:
+    - GRID_ID
+  GRID_ID:
+    type: GRID
+    id: GRID_ID
+    children:
+    - ROW-1
+    - ROW-2
+    - ROW-3
+    - ROW-4
+    parents:
+    - ROOT_ID
+  HEADER_ID:
+    type: HEADER
+    id: HEADER_ID
+    meta:
+      text: Past weather
+  ROW-1:
+    type: ROW
+    id: ROW-1
+    children:
+    - CHART-average-temperature
+    - CHART-average-wind-speed
+    - CHART-total-precipitation
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-average-temperature:
+    type: CHART
+    id: CHART-average-temperature
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-1
+    meta:
+      chartId: 10
+      uuid: d2442cfc-fb58-49c5-9474-470775c3fcc3
+      sliceName: Average temperature
+      width: 4
+      height: 22
+  CHART-average-wind-speed:
+    type: CHART
+    id: CHART-average-wind-speed
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-1
+    meta:
+      chartId: 11
+      uuid: 3175ba42-9b2f-43e2-9ef6-e569404539c8
+      sliceName: Average wind speed
+      width: 4
+      height: 22
+  CHART-total-precipitation:
+    type: CHART
+    id: CHART-total-precipitation
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-1
+    meta:
+      chartId: 12
+      uuid: 62c4e068-3533-48dc-9a3d-8569d2a383d3
+      sliceName: Total precipitation
+      width: 4
+      height: 22
+  ROW-2:
+    type: ROW
+    id: ROW-2
+    children:
+    - CHART-temperature
+    - CHART-wind-speed
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-temperature:
+    type: CHART
+    id: CHART-temperature
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-2
+    meta:
+      chartId: 13
+      uuid: c759a571-c7d9-49c8-ab3d-0d8e96bbada7
+      sliceName: Temperature
+      width: 6
+      height: 50
+  CHART-wind-speed:
+    type: CHART
+    id: CHART-wind-speed
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-2
+    meta:
+      chartId: 14
+      uuid: 215bbd82-0a61-4afd-926a-a34c91f5dd70
+      sliceName: Wind speed
+      width: 6
+      height: 50
+  ROW-3:
+    type: ROW
+    id: ROW-3
+    children:
+    - CHART-solar-radiation
+    - CHART-cloud-cover
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-solar-radiation:
+    type: CHART
+    id: CHART-solar-radiation
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-3
+    meta:
+      chartId: 15
+      uuid: d5038254-d328-4765-86aa-cc18280f0d0a
+      sliceName: Solar radiation
+      width: 6
+      height: 50
+  CHART-cloud-cover:
+    type: CHART
+    id: CHART-cloud-cover
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-3
+    meta:
+      chartId: 16
+      uuid: fc31c6a1-9e15-4b9b-97db-9f355fd37a4a
+      sliceName: Cloud cover
+      width: 6
+      height: 50
+  ROW-4:
+    type: ROW
+    id: ROW-4
+    children:
+    - CHART-precipitation
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-precipitation:
+    type: CHART
+    id: CHART-precipitation
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-4
+    meta:
+      chartId: 17
+      uuid: 6c71d947-6f96-4b5f-b421-f35f20262439
+      sliceName: Precipitation
+      width: 12
+      height: 50
+metadata:
+  native_filter_configuration:
+  - id: NATIVE_FILTER-location
+    name: Location
+    filterType: filter_select
+    type: NATIVE_FILTER
+    description: Leave empty to show all locations.
+    targets:
+    - column:
+        name: location_name
+      datasetUuid: 656199f9-9a08-4139-be44-e9c43edf0de1
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    tabsInScope: []
+  - id: NATIVE_FILTER-time-range
+    name: Time range
+    filterType: filter_time
+    type: NATIVE_FILTER
+    description: Applies to interval_start_utc (UTC).
+    targets:
+    - {}
+    defaultDataMask:
+      extraFormData:
+        time_range: Last week
+      filterState:
+        value: Last week
+      ownState: {}
+    controlValues: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    tabsInScope: []
+  refresh_frequency: 3600
+  timed_refresh_immune_slices: []
+  expanded_slices: {}
+  color_scheme: supersetColors
+  label_colors: {}
+  cross_filters_enabled: false
+  chart_configuration: {}
+  shared_label_colors: []
+  map_label_colors: {}
+  color_scheme_domain: []
+version: 1.0.0

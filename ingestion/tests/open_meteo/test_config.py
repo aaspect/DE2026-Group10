@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from open_meteo.config import PROJECT_DIR, ConfigError, load_locations
+from open_meteo.config import PROJECT_DIR, ConfigError, Settings, load_locations
 
 VALID_ENTRY = """
 [[locations]]
@@ -14,6 +14,7 @@ longitude = 24.7536
 bidding_zone = "EE"
 role = "demand"
 """
+CREDENTIALS = {"CLICKHOUSE_USER": "pipeline", "CLICKHOUSE_PASSWORD": "pipeline"}
 
 
 @pytest.mark.parametrize(
@@ -75,3 +76,65 @@ def test_shipped_locations_file_has_five_locations() -> None:
         "narva",
         "kuressaare",
     ]
+
+
+def test_destination_defaults_to_the_warehouse_on_localhost() -> None:
+    settings = Settings.from_env(CREDENTIALS)
+
+    assert settings.destination == "warehouse"
+    assert settings.clickhouse_url == "http://localhost:8123"
+    assert (settings.writes_warehouse, settings.writes_file) == (True, False)
+
+
+@pytest.mark.parametrize(
+    ("destination", "writes_warehouse", "writes_file"),
+    [("file", False, True), ("both", True, True)],
+)
+def test_destination_can_be_file_or_both(
+    destination: str, writes_warehouse: bool, writes_file: bool
+) -> None:
+    settings = Settings.from_env(CREDENTIALS | {"OPEN_METEO_DESTINATION": destination})
+
+    assert settings.destination == destination
+    assert (settings.writes_warehouse, settings.writes_file) == (writes_warehouse, writes_file)
+
+
+def test_unknown_destination_is_refused() -> None:
+    expected_message = "OPEN_METEO_DESTINATION must be one of warehouse, file, both, got 'bronze'"
+
+    with pytest.raises(ConfigError, match=re.escape(expected_message)):
+        Settings.from_env(CREDENTIALS | {"OPEN_METEO_DESTINATION": "bronze"})
+
+
+def test_destination_argument_overrides_the_environment() -> None:
+    settings = Settings.from_env({"OPEN_METEO_DESTINATION": "warehouse"}, destination="file")
+
+    assert settings.destination == "file"
+
+
+@pytest.mark.parametrize("destination", ["warehouse", "both"])
+@pytest.mark.parametrize(
+    "credentials",
+    [
+        pytest.param({"CLICKHOUSE_PASSWORD": "pipeline"}, id="no-user"),
+        pytest.param({"CLICKHOUSE_USER": "pipeline"}, id="no-password"),
+        pytest.param({"CLICKHOUSE_USER": "pipeline", "CLICKHOUSE_PASSWORD": " "}, id="blank"),
+    ],
+)
+def test_warehouse_destination_needs_credentials(
+    destination: str, credentials: dict[str, str]
+) -> None:
+    expected_message = (
+        "CLICKHOUSE_USER and CLICKHOUSE_PASSWORD must be set when the destination includes "
+        "warehouse"
+    )
+
+    with pytest.raises(ConfigError, match=re.escape(expected_message)):
+        Settings.from_env(credentials | {"OPEN_METEO_DESTINATION": destination})
+
+
+def test_file_destination_needs_no_credentials() -> None:
+    settings = Settings.from_env({"OPEN_METEO_DESTINATION": "file"})
+
+    assert settings.clickhouse_user is None
+    assert settings.clickhouse_password is None

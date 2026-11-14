@@ -7,7 +7,9 @@ from open_meteo.config import Settings
 from open_meteo.periods import PeriodError, resolve_period
 
 TODAY = date(2026, 11, 14)
-SETTINGS = Settings.from_env({"OPEN_METEO_FORECAST_DAYS": "3", "OPEN_METEO_ARCHIVE_DAYS": "7"})
+SETTINGS = Settings.from_env(
+    {"OPEN_METEO_FORECAST_DAYS": "3", "OPEN_METEO_ARCHIVE_DAYS": "7"}, destination="file"
+)
 
 
 @pytest.mark.parametrize(

@@ -78,6 +78,8 @@ services:
       DBT_PROFILES_DIR: /opt/dbt
       CLICKHOUSE_USER: ${CLICKHOUSE_USER}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+      # The weather job inserts into bronze through this endpoint, with the pipeline account above.
+      CLICKHOUSE_URL: http://clickhouse:8123
     ports:
       - "${AIRFLOW_PORT:-8080}:8080"
     volumes:

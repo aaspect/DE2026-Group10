@@ -1,0 +1,100 @@
+version: 2
+
+models:
+  - name: open_meteo_weather
+    description: >
+      Hourly Open-Meteo weather, typed, renamed, cleaned and deduplicated from
+      bronze.open_meteo_weather. Grain: one row per location, hour, source type and forecast
+      version (archive rows have no forecast version). When bronze holds a grain key more than
+      once, the row with the latest `loaded_at` is kept, and the largest `run_id` breaks a tie.
+      Physically impossible values are set to NULL and the rest of the row is kept. Bronze rows
+      whose location, hour or source type is missing or unparsable, and forecast rows without a
+      forecast version, are left out; they stay in bronze.
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              [location_key, interval_start_utc, source_type, forecast_issued_utc]
+    columns:
+      - name: location_key
+        description: The configured location id (`location_id` in bronze), e.g. `tallinn`.
+        data_tests:
+          - not_null
+      - name: interval_start_utc
+        description: Start of the hour the values refer to, UTC (`hour_utc` in bronze).
+        data_tests:
+          - not_null
+      - name: source_type
+        description: "`forecast` (predicted) or `archive` (observed)."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [forecast, archive]
+      - name: forecast_issued_utc
+        description: >
+          When the forecast was retrieved, UTC (`forecast_version_at` in bronze); identifies the
+          forecast version. NULL for archive rows.
+      - name: lead_time_h
+        description: >
+          Whole hours from `forecast_issued_utc` to `interval_start_utc`, rounded down; negative
+          for hours before the issue time. NULL for archive rows.
+      - name: temperature_c
+        description: Air temperature at 2 m, °C, as delivered.
+      - name: wind_speed_ms
+        description: Wind speed at 10 m, m/s. NULL if the delivered value was negative.
+        data_tests:
+          - within_range:
+              arguments:
+                min_value: 0
+      - name: wind_direction_deg
+        description: Wind direction at 10 m, degrees. NULL if the delivered value was outside 0–360.
+        data_tests:
+          - within_range:
+              arguments:
+                min_value: 0
+                max_value: 360
+      - name: shortwave_radiation_wm2
+        description: >
+          Global horizontal radiation, W/m², mean over the preceding hour. NULL if the delivered
+          value was negative.
+        data_tests:
+          - within_range:
+              arguments:
+                min_value: 0
+      - name: direct_radiation_wm2
+        description: >
+          Direct radiation, W/m², mean over the preceding hour. NULL if the delivered value was
+          negative.
+        data_tests:
+          - within_range:
+              arguments:
+                min_value: 0
+      - name: cloud_cover_pct
+        description: Total cloud cover, %. NULL if the delivered value was outside 0–100.
+        data_tests:
+          - within_range:
+              arguments:
+                min_value: 0
+                max_value: 100
+      - name: precipitation_mm
+        description: >
+          Precipitation, mm, sum over the preceding hour. NULL if the delivered value was negative.
+        data_tests:
+          - within_range:
+              arguments:
+                min_value: 0
+      - name: grid_latitude
+        description: Latitude of the provider's grid point the values come from, as delivered.
+      - name: grid_longitude
+        description: Longitude of the provider's grid point, as delivered.
+      - name: grid_elevation_m
+        description: Elevation of the provider's grid point, m, as delivered.
+      - name: run_id
+        description: The run whose load supplied this row (the winning load).
+        data_tests:
+          - not_null
+      - name: loaded_at
+        description: When the winning load was made, UTC.
+        data_tests:
+          - not_null

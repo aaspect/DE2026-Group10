@@ -1,0 +1,55 @@
+version: 2
+
+models:
+  - name: mart_past_weather
+    description: >
+      Observed (archive) weather, hourly and not pre-aggregated. Grain: one row per location per
+      observed hour; forecasts never appear. This is the interface of the "Past weather"
+      dashboard (superset/dashboards/past_weather/), the only table it reads: changing or
+      removing a column is a breaking change for its dataset. NULL in a value column means the
+      provider gave no value or silver removed an impossible one.
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [location_key, interval_start_utc]
+    columns:
+      - name: location_key
+        description: Configured location id.
+        data_tests:
+          - not_null
+      - name: location_name
+        description: Display name; the dashboard's filter and series label.
+      - name: location_role
+        description: "`demand`, `solar` or `wind`."
+      - name: zone_code
+        description: Bidding zone.
+      - name: interval_start_utc
+        description: Start of the hour, UTC; the dashboard's time column.
+        data_tests:
+          - not_null
+      - name: interval_start_local
+        description: The same moment in Europe/Tallinn time.
+      - name: local_date
+        description: Tallinn date.
+      - name: local_hour
+        description: Tallinn hour, 0–23.
+      - name: day_of_week
+        description: Tallinn day of the week, 1 = Monday.
+      - name: is_weekend
+        description: True on Saturday and Sunday (Tallinn date).
+      - name: temperature_c
+        description: Air temperature at 2 m, °C.
+      - name: wind_speed_ms
+        description: Wind speed at 10 m, m/s.
+      - name: wind_direction_deg
+        description: Wind direction at 10 m, 0–360°.
+      - name: shortwave_radiation_wm2
+        description: Global horizontal radiation, W/m², mean over the preceding hour.
+      - name: direct_radiation_wm2
+        description: Direct radiation, W/m², mean over the preceding hour.
+      - name: cloud_cover_pct
+        description: Total cloud cover, 0–100 %.
+      - name: precipitation_mm
+        description: Precipitation, mm, sum over the preceding hour.
+      - name: loaded_at
+        description: When the shown value was loaded into bronze, UTC.

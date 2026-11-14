@@ -1,4 +1,4 @@
-.PHONY: up down reset ps logs dbt-debug lint format test
+.PHONY: up down reset ps logs dbt-debug dbt-build lint format test
 
 # Start the whole stack and wait until every service is healthy.
 up:
@@ -22,6 +22,10 @@ logs:
 # Check that dbt can connect to the warehouse (the stack must be running).
 dbt-debug:
 	docker compose exec airflow /opt/venvs/dbt/bin/dbt debug --project-dir /opt/dbt
+
+# Build and test all dbt models (the stack must be running).
+dbt-build:
+	docker compose exec airflow /opt/venvs/dbt/bin/dbt build --project-dir /opt/dbt
 
 lint:
 	cd ingestion && uv run ruff check . && uv run ruff format --check .
