@@ -1,0 +1,34 @@
+name: energy_analytics
+version: "1.0.0"
+profile: energy_analytics
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+
+# `+schema` is the ClickHouse database a folder's models are built into
+# (see macros/generate_schema_name.sql). Marts live in gold next to facts and dimensions.
+models:
+  energy_analytics:
+    silver:
+      +schema: silver
+    gold:
+      +schema: gold
+    marts:
+      +schema: gold
+
+# Reference data copied from configuration files. Built into silver: bronze is written only by
+# the ingestion jobs.
+seeds:
+  energy_analytics:
+    silver:
+      +schema: silver
+      weather_locations:
+        +column_types:
+          location_key: String
+          location_name: String
+          latitude: Float64
+          longitude: Float64
+          zone_code: LowCardinality(String)
+          location_role: LowCardinality(String)

@@ -1,0 +1,17 @@
+database_name: ClickHouse warehouse
+sqlalchemy_uri: ${SUPERSET_WAREHOUSE_URI}
+cache_timeout: null
+expose_in_sqllab: true
+allow_run_async: false
+allow_ctas: false
+allow_cvas: false
+allow_dml: false
+allow_file_upload: false
+extra:
+  metadata_params: {}
+  engine_params: {}
+  metadata_cache_timeout: {}
+  schemas_allowed_for_file_upload: []
+impersonate_user: false
+uuid: f4f65658-04f3-4cc1-83e1-e03ea7ff373d
+version: 1.0.0

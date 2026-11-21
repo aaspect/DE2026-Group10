@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  ingestion:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ingestion
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --locked
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run pytest
+
+  stack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uvx ruff check airflow superset
+      - run: uvx ruff format --check airflow superset
+
+  # Builds and tests the dbt models against a throwaway ClickHouse holding a small bronze fixture.
+  dbt:
+    runs-on: ubuntu-latest
+    services:
+      clickhouse:
+        image: clickhouse/clickhouse-server:25.8.33
+        env:
+          CLICKHOUSE_USER: pipeline
+          CLICKHOUSE_PASSWORD: pipeline
+          CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
+        ports:
+          - 8123:8123
+        options: >-
+          --health-cmd "clickhouse-client --user pipeline --password pipeline --query 'SELECT 1'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      # Read by dbt/profiles.yml.
+      CLICKHOUSE_HOST: localhost
+      CLICKHOUSE_USER: pipeline
+      CLICKHOUSE_PASSWORD: pipeline
+      DBT_PROFILES_DIR: dbt
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      # SQL files go through the client inside the service container: they hold several
+      # statements, and the HTTP interface takes one per request.
+      - run: >-
+          echo "CLICKHOUSE_CLIENT=docker exec -i ${{ job.services.clickhouse.id }}
+          clickhouse-client --user pipeline --password pipeline" >> "$GITHUB_ENV"
+      # The same dbt adapter version as airflow/Dockerfile.
+      - run: uv venv --python 3.12 .dbt-venv
+      - run: uv pip install --python .dbt-venv/bin/python dbt-clickhouse==1.9.8
+      # The stack's init scripts, in file-name order (02_users.sh only adds Superset's account).
+      - run: $CLICKHOUSE_CLIENT --multiquery < infra/clickhouse/init/01_databases.sql
+      - run: $CLICKHOUSE_CLIENT --multiquery < infra/clickhouse/init/03_bronze_open_meteo_weather.sql
+      # The same input settings as the ingestion job's insert.
+      - run: >-
+          $CLICKHOUSE_CLIENT
+          --date_time_input_format=best_effort --input_format_try_infer_datetimes=0
+          --query "INSERT INTO bronze.open_meteo_weather FORMAT JSONEachRow"
+          < dbt/ci/bronze_open_meteo_weather.jsonl
+      - run: .dbt-venv/bin/dbt build --project-dir dbt
+      - run: .dbt-venv/bin/dbt source freshness --project-dir dbt
+      - run: $CLICKHOUSE_CLIENT --multiquery < dbt/ci/assert_fixture_results.sql

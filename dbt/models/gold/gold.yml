@@ -1,0 +1,123 @@
+version: 2
+
+models:
+  - name: dim_location
+    description: >
+      Weather locations, one row per configured location. SCD type 1: rebuilt from the
+      `weather_locations` seed on every run.
+    columns:
+      - name: location_key
+        description: Primary key; the configured location id, e.g. `tallinn`.
+        data_tests:
+          - unique
+          - not_null
+      - name: location_name
+        description: Display name, e.g. `Pärnu`.
+      - name: latitude
+        description: Latitude of the configured point (not the provider's grid point).
+      - name: longitude
+        description: Longitude of the configured point.
+      - name: zone_code
+        description: Bidding zone, e.g. `EE`.
+      - name: location_role
+        description: "`demand`, `solar` or `wind`."
+      - name: loaded_at
+        description: When dbt built the row, UTC.
+
+  - name: dim_interval
+    description: >
+      Time dimension at 60-minute grain, one row per UTC hour, from 1 January of the earliest
+      year in silver weather to 31 December of the latest. Local attributes are Europe/Tallinn.
+      Every UTC hour appears once: on the autumn clock change local hour 3 appears twice on one
+      local date, and on the spring change local hour 3 does not appear.
+    columns:
+      - name: interval_key
+        description: Primary key; the UTC start as the number YYYYMMDDhhmm, e.g. 202611140000.
+        data_tests:
+          - unique
+          - not_null
+      - name: interval_start_utc
+        description: Start of the hour, UTC.
+        data_tests:
+          - unique
+          - not_null
+      - name: interval_start_local
+        description: The same moment in Europe/Tallinn time.
+      - name: local_date
+        description: Tallinn date.
+      - name: local_hour
+        description: Tallinn hour, 0–23.
+      - name: day_of_week
+        description: Tallinn day of the week, 1 = Monday to 7 = Sunday.
+      - name: is_weekend
+        description: True on Saturday and Sunday (Tallinn date).
+      - name: month
+        description: Tallinn month, 1–12.
+      - name: year
+        description: Tallinn year.
+      - name: iso_week
+        description: ISO week number of the Tallinn date.
+      - name: season
+        description: >
+          Meteorological season of the Tallinn month: `winter` (Dec–Feb), `spring` (Mar–May),
+          `summer` (Jun–Aug), `autumn` (Sep–Nov).
+      - name: is_dst
+        description: True while Tallinn is on summer time (UTC+3).
+      - name: loaded_at
+        description: When dbt built the row, UTC.
+
+  - name: fact_weather
+    description: >
+      Hourly weather values from silver, for the locations in dim_location. Grain: one row per
+      location per hour per source type per forecast version; archive rows have no forecast
+      version (`forecast_issued_utc` is NULL).
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              [location_key, interval_start_utc, source_type, forecast_issued_utc]
+    columns:
+      - name: interval_key
+        description: The hour; foreign key to dim_interval.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_interval')
+                field: interval_key
+      - name: location_key
+        description: The location; foreign key to dim_location.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_location')
+                field: location_key
+      - name: interval_start_utc
+        description: Start of the hour, UTC; kept for range filters without a join.
+        data_tests:
+          - not_null
+      - name: source_type
+        description: "`forecast` or `archive`."
+        data_tests:
+          - not_null
+      - name: forecast_issued_utc
+        description: The forecast version (when it was retrieved), UTC. NULL for archive rows.
+      - name: lead_time_h
+        description: Whole hours from the forecast issue time to the hour. NULL for archive rows.
+      - name: temperature_c
+        description: Air temperature at 2 m, °C.
+      - name: wind_speed_ms
+        description: Wind speed at 10 m, m/s.
+      - name: wind_direction_deg
+        description: Wind direction at 10 m, 0–360°.
+      - name: shortwave_radiation_wm2
+        description: Global horizontal radiation, W/m², mean over the preceding hour.
+      - name: direct_radiation_wm2
+        description: Direct radiation, W/m², mean over the preceding hour.
+      - name: cloud_cover_pct
+        description: Total cloud cover, 0–100 %.
+      - name: precipitation_mm
+        description: Precipitation, mm, sum over the preceding hour.
+      - name: loaded_at
+        description: When the values were loaded into bronze, UTC.

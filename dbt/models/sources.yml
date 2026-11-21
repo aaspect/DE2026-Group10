@@ -1,0 +1,39 @@
+version: 2
+
+sources:
+  - name: bronze
+    description: Raw data as ingested, append-only. Loaded by the ingestion jobs, never by dbt.
+    schema: bronze
+    tables:
+      - name: open_meteo_weather
+        description: >
+          Hourly Open-Meteo weather as ingested: one row per location per hour per run, so the
+          same hour repeats across runs. Created by
+          infra/clickhouse/init/03_bronze_open_meteo_weather.sql and written only by the
+          ingestion job (ingestion/open_meteo), which only inserts.
+        config:
+          loaded_at_field: loaded_at
+          # The forecast is loaded every 6 hours. Staleness only warns, it never fails a run.
+          freshness:
+            warn_after: {count: 6, period: hour}
+        columns:
+          - name: record
+            description: >
+              The record as a native JSON document: every key and value of one run-file line
+              (specs/001-open-meteo-ingestion/contracts/output-file.md), read as `record.<key>`.
+              Timestamps are strings, numbers are Int64 or Float64, and a `null` value reads
+              as NULL.
+          - name: run_id
+            description: The run that loaded the row; copied from `record.run_id`.
+            data_tests:
+              - not_null
+          - name: source_type
+            description: "`forecast` or `archive`; copied from `record.source_type`."
+            data_tests:
+              - not_null
+          - name: loaded_at
+            description: >
+              When the run built its records (UTC); the same for every row of a run. Copied
+              from `record.loaded_at`.
+            data_tests:
+              - not_null
