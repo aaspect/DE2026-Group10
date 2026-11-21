@@ -13,6 +13,8 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env (see .env.example)}
       AIRFLOW_DB_PASSWORD: ${AIRFLOW_DB_PASSWORD:?set AIRFLOW_DB_PASSWORD in .env (see .env.example)}
       SUPERSET_DB_PASSWORD: ${SUPERSET_DB_PASSWORD:?set SUPERSET_DB_PASSWORD in .env (see .env.example)}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro

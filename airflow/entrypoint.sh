@@ -14,4 +14,9 @@ passwords_file = Path(os.environ["AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_PASSWORDS_F
 passwords_file.write_text(json.dumps(passwords))
 PYTHON
 
+# Under UID 0 (rootless Podman), the base /entrypoint exports PYTHONPATH pointing to Airflow's
+# site-packages, which leaks into isolated venvs (/opt/venvs/*). PYTHONUSERBASE already lets
+# Airflow find its own packages without polluting venvs.
+unset PYTHONPATH
+
 exec airflow standalone

@@ -19,8 +19,13 @@ from airflow.providers.standard.operators.bash import BashOperator
 from airflow.sdk import DAG, Param
 
 # The job's default destination is the warehouse, so each command loads its run into bronze.
-INGEST_FORECAST = "cd /opt/ingestion && /opt/venvs/ingestion/bin/python -m open_meteo forecast"
-INGEST_ARCHIVE = "cd /opt/ingestion && /opt/venvs/ingestion/bin/python -m open_meteo archive"
+# `env -u PYTHONPATH` keeps Airflow's own site-packages from leaking into the isolated venvs.
+INGEST_FORECAST = (
+    "cd /opt/ingestion && env -u PYTHONPATH /opt/venvs/ingestion/bin/python -m open_meteo forecast"
+)
+INGEST_ARCHIVE = (
+    "cd /opt/ingestion && env -u PYTHONPATH /opt/venvs/ingestion/bin/python -m open_meteo archive"
+)
 
 # A BashOperator that exits with this code is marked skipped instead of failed.
 SKIP_EXIT_CODE = 99
@@ -32,7 +37,7 @@ INGEST_ARCHIVE_ONCE_A_DAY = (
     "{% endif %}"
 )
 
-DBT = "/opt/venvs/dbt/bin/dbt"
+DBT = "env -u PYTHONPATH /opt/venvs/dbt/bin/dbt"
 PROJECT = "--project-dir /opt/dbt"
 NO_RETRIES_NOTE = (
     "No retries: a failed model or test is not a temporary problem, and a retry would only "
