@@ -14,8 +14,8 @@ ClickHouse (warehouse), Airflow (orchestrator, which also runs dbt) and Superset
 
 **You need**: Docker (Docker Desktop or Docker Engine with Compose v2) or Podman (with
 `podman-compose` or `podman compose`), and `make`. The stack uses about 2–4 GB of memory; give
-Docker or Podman at least 4 GB, 8 GB is comfortable. Ports 8080, 8088 and 8123 must be free, or
-set other ports in `.env`.
+Docker or Podman at least 4 GB, 8 GB is comfortable. Ports 8080, 8088, 8123 and 5432 must be free,
+or set other ports in `.env`.
 
 ```bash
 cp .env.example .env   # local placeholder settings; on Linux Docker also set AIRFLOW_UID=$(id -u)
@@ -44,9 +44,10 @@ belong to your host user. In the manual `docker compose` examples below, Podman 
 | Airflow | <http://localhost:8080> | `AIRFLOW_ADMIN_USER` / `AIRFLOW_ADMIN_PASSWORD` (`admin` / `admin`) |
 | Superset | <http://localhost:8088> | `SUPERSET_ADMIN_USER` / `SUPERSET_ADMIN_PASSWORD` (`admin` / `admin`) |
 | ClickHouse (HTTP) | <http://localhost:8123> | `CLICKHOUSE_USER` / `CLICKHOUSE_PASSWORD` (`pipeline` / `pipeline`) |
+| Postgres | `localhost:5432` | `POSTGRES_USER` / `POSTGRES_PASSWORD` (`postgres` / `postgres`) |
 
-Postgres is only reachable from inside the stack. The values in `.env.example` are for a local
-machine only; never reuse them elsewhere. `.env` is git-ignored.
+The values in `.env.example` are for a local machine only; never reuse them elsewhere. `.env` is
+git-ignored.
 
 ### What is in place
 

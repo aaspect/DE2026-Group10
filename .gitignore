@@ -226,3 +226,4 @@ dbt/dbt_packages/
 dbt/.user.yml
 airflow/logs/
 ingestion/output/
+/skills/
