@@ -1,7 +1,7 @@
 # Superset for the local stack: the base image plus the two database drivers it needs
 # (Postgres for its own metadata, ClickHouse for the warehouse), our settings, the committed
 # dashboard bundle and the start script that imports it.
-FROM apache/superset:5.0.0
+FROM docker.io/apache/superset:5.0.0
 
 USER root
 RUN uv pip install --python /app/.venv/bin/python \

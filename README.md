@@ -9,17 +9,24 @@ The objective of the project is to provide analytics related to electricity pric
 
 ## Running the stack
 
-The whole pipeline runs locally with Docker Compose: Postgres (metadata), ClickHouse (warehouse),
-Airflow (orchestrator, which also runs dbt) and Superset (dashboards).
+The whole pipeline runs locally with Docker Compose or Podman Compose: Postgres (metadata),
+ClickHouse (warehouse), Airflow (orchestrator, which also runs dbt) and Superset (dashboards).
 
-**You need**: Docker Desktop or Docker Engine with Compose v2, and `make`. The stack uses about
-2–4 GB of memory; give Docker at least 4 GB, 8 GB is comfortable. Ports 8080, 8088 and 8123 must
-be free, or set other ports in `.env`.
+**You need**: Docker (Docker Desktop or Docker Engine with Compose v2) or Podman (with
+`podman-compose` or `podman compose`), and `make`. The stack uses about 2–4 GB of memory; give
+Docker or Podman at least 4 GB, 8 GB is comfortable. Ports 8080, 8088 and 8123 must be free, or
+set other ports in `.env`.
 
 ```bash
-cp .env.example .env   # local placeholder settings; on Linux also set AIRFLOW_UID=$(id -u)
+cp .env.example .env   # local placeholder settings; on Linux Docker also set AIRFLOW_UID=$(id -u)
 make up                # build, start, and wait until every service is healthy
 ```
+
+`Makefile` auto-detects `docker compose`, `podman-compose`, or `podman compose` (override with
+`COMPOSE=...`, e.g. `make up COMPOSE="podman compose"`). On rootless Podman, `make up` sets
+`AIRFLOW_UID=0` automatically unless it is already set in `.env`, so files written to bind mounts
+belong to your host user. In the manual `docker compose` examples below, Podman users can substitute
+`podman-compose` (or `podman compose`).
 
 | Command | What it does |
 |---|---|
@@ -134,7 +141,7 @@ The dashboard is kept in the repository as a Superset export in
 
    ```bash
    docker compose exec superset superset export-dashboards -f /tmp/export.zip
-   docker compose cp superset:/tmp/export.zip export.zip && unzip export.zip
+   docker compose exec -T superset cat /tmp/export.zip > export.zip && unzip export.zip
    ```
 
 3. Replace `metadata.yaml`, `databases/`, `datasets/`, `charts/` and `dashboards/` in

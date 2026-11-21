@@ -4,7 +4,7 @@
 # Keeping them apart from Airflow's own environment avoids dependency conflicts.
 #
 # Build context is the repository root, so the ingestion lock file can be copied.
-FROM apache/airflow:3.1.8-python3.12
+FROM docker.io/apache/airflow:3.1.8-python3.12
 
 USER root
 RUN mkdir /opt/venvs && chown airflow:0 /opt/venvs
@@ -16,6 +16,10 @@ RUN UV_PROJECT_ENVIRONMENT=/opt/venvs/ingestion \
 
 RUN uv venv /opt/venvs/dbt \
     && uv pip install --python /opt/venvs/dbt/bin/python dbt-clickhouse==1.9.8
+
+# Lets `airflow` CLI work under any container UID (rootless Podman UID 0 or Linux host UID)
+# even when invoked via `compose exec`, which bypasses the base image's /entrypoint.
+ENV PYTHONUSERBASE=/home/airflow/.local
 
 COPY airflow/entrypoint.sh /opt/airflow/entrypoint.sh
 CMD ["bash", "/opt/airflow/entrypoint.sh"]
