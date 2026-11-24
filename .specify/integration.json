@@ -3,18 +3,18 @@
   "integration_state_schema": 1,
   "installed_integrations": [
     "claude",
-    "gemini"
+    "agy"
   ],
   "integration_settings": {
     "claude": {
       "script": "sh",
       "invoke_separator": "-"
     },
-    "gemini": {
+    "agy": {
       "script": "sh",
-      "invoke_separator": "."
+      "invoke_separator": "-"
     }
   },
-  "integration": "gemini",
-  "default_integration": "gemini"
+  "integration": "agy",
+  "default_integration": "agy"
 }
